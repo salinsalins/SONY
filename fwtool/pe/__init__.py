@@ -35,15 +35,14 @@ def isExe(file):
  return header and header.magic == dosHeaderMagic
 
 def readExe(file):
- """Takes the a PE file and returns a dict containing the sections"""
- print('\nreadExe file ', file.name)
+ """Takes PE file and returns dict containing the sections"""
  dosHeader = DosHeader.unpack(file)
  if dosHeader.magic != dosHeaderMagic:
-  raise Exception('Wrong magic')
+  raise Exception('Wrong dosHeader magic')
 
  peHeader = PeHeader.unpack(file, dosHeader.peHeaderOffset)
  if peHeader.magic != peHeaderMagic:
-  raise Exception('Wrong magic')
+  raise Exception('Wrong peHeader magic')
 
  sections = OrderedDict()
  for i in range(peHeader.numSections):

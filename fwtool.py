@@ -122,8 +122,11 @@ def getDevices():
 
 
 def unpackInstaller(exeFile, datFile):
- print('\nExtracting %s from installer %s'%(datFile.name, exeFile.name))
+ print('\nExtracting installer %s from  %s'%(datFile.name, exeFile.name))
  exeSectors = pe.readExe(exeFile)
+ for key in exeSectors.keys():
+  print(key)
+ print('-----------------------------------------------')
  zipFile = exeSectors['_winzip_']
  zippedFiles = dict((file.path, file) for file in zip.readZip(zipFile))
  print('\nFiles in "_winzip_" section:')
@@ -141,7 +144,7 @@ def unpackInstaller(exeFile, datFile):
 
 
 def unpackDat(datFile, fdatFile):
- print('\nExtarct drom %s firmware and decrypt to fdat file "%s"'%(datFile.name, fdatFile.name))
+ print('\nExtract from %s firmware and decrypt to "%s"'%(datFile.name, fdatFile.name))
  datContents = dat.readDat(datFile)
  crypterName, data = fdat.decryptFdat(datContents.firmwareData)
  shutil.copyfileobj(data, fdatFile)
