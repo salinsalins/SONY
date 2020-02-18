@@ -2,9 +2,9 @@
 import pefile
 
 #file = "d:\\Your files\\Sanin\\Downloads\\Update_ILCE7M3V310.exe"
-file = "Update_ILCE7M3V310.exe"
-pe = pefile.PE(file)
-pe.print_info()  # Prints all Headers in a human readable format
+#file = "Update_ILCE7M3V310.exe"
+#pe = pefile.PE(file)
+#pe.print_info()  # Prints all Headers in a human readable format
 
 from collections import OrderedDict
 import io
@@ -26,8 +26,10 @@ def unpack_exe(exe_file_name='Update_ILCE7M3V310.exe', out_dir='ILCE7M3V310'):
     """Extract the exe file to the specified directory"""
     exe_file = open(exe_file_name, 'rb')
     #os.mkdir(out_dir)
-    print('\nUnpacking file "%s" to folder "%s"' % (exe_file.name, out_dir))
+    print('\nUnpacking file %s to folder %s' % (exe_file.name, out_dir))
     exe_file_mtime = os.stat(exe_file.name).st_mtime
+    exe_file_size = os.stat(exe_file.name).st_size
+    print('\nFile %s size %d' % (exe_file.name, exe_file_size))
 
     datConf = None
     fdatConf = None
@@ -44,7 +46,8 @@ def unpack_exe(exe_file_name='Update_ILCE7M3V310.exe', out_dir='ILCE7M3V310'):
 
 
 def unpackInstaller(exeFile, datFile):
-    print('\nFrom %s extracting firmware to %s ' % (exeFile.name, datFile.name))
+    print('\n-----------------------------------------------')
+    print('From %s extracting firmware to %s ' % (exeFile.name, datFile.name))
     exeSectors = pe.readExe(exeFile)
     print('\nEXE file sections:')
     print('-----------------------------------------------')
@@ -52,18 +55,17 @@ def unpackInstaller(exeFile, datFile):
     print('-----------------------------------------------')
     for key in exeSectors.keys():
         print('%-10s %-10d %-10d' % (key, exeSectors[key].offset, exeSectors[key].size))
-    print('-----------------------------------------------')
     zipFile = exeSectors['_winzip_']
     zippedFiles = dict((file.path, file) for file in zip.readZip(zipFile))
     print('\nFiles in "_winzip_" section:')
     for key in zippedFiles.keys():
         print(key)
-    print('-----------------------------------------------')
 
     datFileName = dat.findDat(zippedFiles.keys())
-    print('\ndat file name:', datFileName)
     zippedDatFile = zippedFiles[datFileName]
     shutil.copyfileobj(zippedDatFile.contents, datFile)
+    print('\nExtracted dat file ', datFileName, 'to', datFile.name)
+    print('-----------------------------------------------')
 
     ###print('mtime=', zippedDatFile.mtime)
     return zippedDatFile.mtime

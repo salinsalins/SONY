@@ -82,7 +82,7 @@ class Struct(object):
   if len(data) < self.size:
    return None
   result = self.tuple._make(struct.unpack_from(self.format, data))
-  print('Offset:', offset, 'Size:', self.size, result)
+  print('Offset: %-10s Size: %-10d %s' % (offset, self.size, result))
   return result
 
  def pack(self, **kwargs):
