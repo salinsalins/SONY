@@ -22,7 +22,7 @@ def print_usage():
     print('unpack.py firmware_exe_file output_dir')
 
 
-def unpack_exe(exe_file_name='Update_ILCE7M3V310.exe', out_dir='ILCE7M3V310'):
+def unpack(exe_file_name='Update_ILCE7M3V310.exe', out_dir='ILCE7M3V310'):
     """Extract the exe file to the specified directory"""
     exe_file = open(exe_file_name, 'rb')
     #os.mkdir(out_dir)
@@ -36,8 +36,8 @@ def unpack_exe(exe_file_name='Update_ILCE7M3V310.exe', out_dir='ILCE7M3V310'):
 
     if pe.isExe(exe_file):
         with open(out_dir + '/firmware.dat', 'w+b') as datFile, open(out_dir + '/firmware.fdat', 'w+b') as fdatFile:
-            mtime = unpackInstaller(exe_file, datFile)
-            datConf = unpackDat(datFile, fdatFile)
+            mtime = unpack_exe(exe_file, datFile)
+            datConf = unpack_dat(datFile, fdatFile)
             fdatConf = unpackFdat(fdatFile, out_dir, mtime)
         raise Exception('Unknown file type!')
 
@@ -45,7 +45,7 @@ def unpack_exe(exe_file_name='Update_ILCE7M3V310.exe', out_dir='ILCE7M3V310'):
         writeYaml({'dat': datConf, 'fdat': fdatConf}, yamlFile)
 
 
-def unpackInstaller(exeFile, datFile):
+def unpack_exe(exeFile, datFile):
     print('\n-----------------------------------------------')
     print('From %s extracting firmware to %s ' % (exeFile.name, datFile.name))
     exeSectors = pe.readExe(exeFile)
@@ -70,10 +70,24 @@ def unpackInstaller(exeFile, datFile):
     ###print('mtime=', zippedDatFile.mtime)
     return zippedDatFile.mtime
 
+def unpack_dat(datFile, fdatFile):
+    print('\nExtract and decypt FDAT section from %s to %s'%(datFile.name, fdatFile.name))
+    datContents = dat.readDat(datFile)
+    crypterName, data = fdat.decryptFdat(datContents.firmwareData)
+    shutil.copyfileobj(data, fdatFile)
+    print(' Used crypter', crypterName)
+
+    return {
+    'normalUsbDescriptors': datContents.normalUsbDescriptors,
+    'updaterUsbDescriptors': datContents.updaterUsbDescriptors,
+    'isLens': datContents.isLens,
+    'crypterName': crypterName,
+    }
+
 
 def main():
   try:
-    unpack_exe(sys.argv[1], sys.argv[2])
+    unpack(sys.argv[1], sys.argv[2])
   except:
     print_usage()
 
