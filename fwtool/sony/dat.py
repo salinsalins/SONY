@@ -4,6 +4,7 @@ from collections import namedtuple
 import io
 import re
 import shutil
+import os
 
 from ..io import FilePart
 from ..util import *
@@ -103,7 +104,7 @@ def _calcCrc(file, fileSize):
 
 def readDat(file):
  """Reads a .dat file"""
- print('\nreadDat file ', file.name)
+ print('\nreadDat -- file:', file.name, 'size:', os.stat(file.name).st_size)
  chunkList, fileSize = readChunks(file)
  chunks = dict(chunkList)
  print('Sections in dat file (next_offset = offset+8+size):')

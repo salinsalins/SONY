@@ -218,7 +218,8 @@ class AesCbcCrypter(AesCrypter):
 
  def encrypt(self, file):
   ###raise Exception('Encryption not supported')
-  file1 = open('outdir/firmware.fdat', 'rb')
+  ###file1 = open('outdir/firmware.fdat', 'rb')
+  file1 = open('ILCE7M3V310/firmware.fdat', 'rb')
   file1.seek(-0x110, 2)
   #size = file1.tell()
   self._iv = file1.read(0x10)
@@ -251,7 +252,7 @@ def isFdat(file):
 
 def decryptFdat(file):
  """Decrypts an encrypted FDAT file"""
- print('\ndecryptFdat file ', file)
+ print('\ndecryptFdat -- file ', file.file.name)
  for crypterName, crypter in _crypters.items():
   print('Try crypter ', crypterName)
   try:
@@ -276,7 +277,7 @@ def _calcCrc(file):
 
 def readFdat(file):
  """Reads a decrypted FDAT file and returns its contents"""
- print('\nreadFdat file ', file)
+ print('\nreadFdat -- file:', file.name)
  header = FdatHeader.unpack(file)
 
  if header.magic != fdatHeaderMagic:

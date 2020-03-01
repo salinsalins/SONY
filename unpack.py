@@ -19,7 +19,7 @@ from fwtool.sony import backup, bootloader, dat, fdat, flash, wbi
 
 
 def print_usage():
-    print('unpack.py firmware_exe_file output_dir')
+    print('Usage:   >unpack.py firmware_exe_file output_dir')
 
 
 def unpack(exe_file_name='Update_ILCE7M3V310.exe', out_dir='ILCE7M3V310'):
@@ -38,7 +38,8 @@ def unpack(exe_file_name='Update_ILCE7M3V310.exe', out_dir='ILCE7M3V310'):
         with open(out_dir + '/firmware.dat', 'w+b') as datFile, open(out_dir + '/firmware.fdat', 'w+b') as fdatFile:
             mtime = unpack_exe(exe_file, datFile)
             datConf = unpack_dat(datFile, fdatFile)
-            fdatConf = unpackFdat(fdatFile, out_dir, mtime)
+            fdatConf = unpack_fdat(fdatFile, out_dir, mtime)
+    else:
         raise Exception('Unknown file type!')
 
     with open(out_dir + '/config.yaml', 'w') as yamlFile:
@@ -71,11 +72,13 @@ def unpack_exe(exeFile, datFile):
     return zippedDatFile.mtime
 
 def unpack_dat(datFile, fdatFile):
-    print('\nExtract and decypt FDAT section from %s to %s'%(datFile.name, fdatFile.name))
+    print('\nExtract and decrypt FDAT section from %s to %s'%(datFile.name, fdatFile.name))
     datContents = dat.readDat(datFile)
     crypterName, data = fdat.decryptFdat(datContents.firmwareData)
-    shutil.copyfileobj(data, fdatFile)
     print(' Used crypter', crypterName)
+    shutil.copyfileobj(data, fdatFile)
+    print('\nExtracted fdat file', fdatFile.name, 'size', os.stat(fdatFile.name).st_size)
+    print('-----------------------------------------------')
 
     return {
     'normalUsbDescriptors': datContents.normalUsbDescriptors,
@@ -83,6 +86,22 @@ def unpack_dat(datFile, fdatFile):
     'isLens': datContents.isLens,
     'crypterName': crypterName,
     }
+
+def unpack_fdat(fdatFile, outDir, mtime):
+    print('\nunpack_fdat from %s to folder %s %s'%(fdatFile.name, outDir, str(mtime)))
+    fdatContents = fdat.readFdat(fdatFile)
+
+    writeFileTree([
+        toUnixFile('/firmware.tar', fdatContents.firmware, mtime),
+        toUnixFile('/updater.img', fdatContents.fs, mtime),
+        ], outDir)
+
+    return {
+        'model': fdatContents.model,
+        'region': fdatContents.region,
+        'version': fdatContents.version,
+        'isAccessory': fdatContents.isAccessory,
+         }
 
 
 def main():

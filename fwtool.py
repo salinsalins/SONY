@@ -329,6 +329,9 @@ def main():
  printBackup.add_argument('-f', dest='backupFile', type=argparse.FileType('rb'), required=True, help='backup file')
  subparsers.add_parser('list_devices', description='List all known devices')
 
+ #print(os.getcwd())
+ #fff = open('c:\\Users\\sanin\\PycharmProjects\\SONY\\ILCE7M3V310\\config.yaml')
+
  args = parser.parse_args()
  if args.command == 'unpack':
   unpackCommand(args.inFile, args.outDir)
