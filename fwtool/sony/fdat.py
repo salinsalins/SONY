@@ -252,7 +252,7 @@ def isFdat(file):
 
 def decryptFdat(file):
  """Decrypts an encrypted FDAT file"""
- print('\ndecryptFdat -- file ', file.file.name)
+ #print('\ndecryptFdat -- file ', file.file.name)
  for crypterName, crypter in _crypters.items():
   print('Try crypter ', crypterName)
   try:
